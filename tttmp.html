@@ -1,0 +1,65 @@
+<!-- Client-side code (HTML) -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tic Tac Toe</title>
+  <style>
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 10px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: lightgray;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 48px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+  <div class="board">
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <script>
+    const cells = document.querySelectorAll('.cell');
+    let currentPlayer = 'X';
+
+    const ws = new WebSocket('ws://localhost:8080');
+
+    cells.forEach((cell, index) => {
+      cell.addEventListener('click', () => {
+        if (!cell.textContent) {
+          cell.textContent = currentPlayer;
+
+          // Send the move to the server
+          ws.send(JSON.stringify({ index, player: currentPlayer }));
+
+          currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+      });
+    });
+
+    ws.addEventListener('message', event => {
+      const { index, player } = JSON.parse(event.data);
+      cells[index].textContent = player;
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    });
+  </script>
+</body>
+</html>
